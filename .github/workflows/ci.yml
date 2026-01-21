@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npx vite-plus install
+
+      - run: npx nuxt prepare
+
+      - name: Format Check
+        run: npx vite fmt
+
+      - name: Lint
+        run: npx vite lint
+
+      - name: Type Check
+        run: npx vite lint --type-check
+
+      - name: Test
+        run: npx vite test run
