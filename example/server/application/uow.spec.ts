@@ -1,16 +1,16 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createUoW } from './uow.impl'
 import { createEventBus } from '../infrastructure/eventBus.impl'
-import { TodoId, TodoEvent } from '../domain/todo.impl'
+import { todoId, todoEvent } from '../domain/todo.impl'
 
 describe('UnitOfWork', () => {
   it('collects events', () => {
     const bus = createEventBus()
     const uow = createUoW(bus)
 
-    const id = TodoId.generate()
-    uow.events.push(TodoEvent.created(id))
-    uow.events.push(TodoEvent.completed(id))
+    const id = todoId.generate()
+    uow.events.push(todoEvent.created(id))
+    uow.events.push(todoEvent.completed(id))
 
     expect(uow.events).toHaveLength(2)
   })
@@ -21,9 +21,9 @@ describe('UnitOfWork', () => {
     bus.subscribe(handler)
     const uow = createUoW(bus)
 
-    const id = TodoId.generate()
-    uow.events.push(TodoEvent.created(id))
-    uow.events.push(TodoEvent.completed(id))
+    const id = todoId.generate()
+    uow.events.push(todoEvent.created(id))
+    uow.events.push(todoEvent.completed(id))
     uow.commit()
 
     expect(handler).toHaveBeenCalledTimes(2)
@@ -33,7 +33,7 @@ describe('UnitOfWork', () => {
     const bus = createEventBus()
     const uow = createUoW(bus)
 
-    uow.events.push(TodoEvent.created(TodoId.generate()))
+    uow.events.push(todoEvent.created(todoId.generate()))
     uow.commit()
 
     expect(uow.events).toHaveLength(0)
@@ -45,10 +45,10 @@ describe('UnitOfWork', () => {
     bus.subscribe(handler)
     const uow = createUoW(bus)
 
-    uow.events.push(TodoEvent.created(TodoId.generate()))
+    uow.events.push(todoEvent.created(todoId.generate()))
     uow.commit()
 
-    uow.events.push(TodoEvent.completed(TodoId.generate()))
+    uow.events.push(todoEvent.completed(todoId.generate()))
     uow.commit()
 
     expect(handler).toHaveBeenCalledTimes(2)

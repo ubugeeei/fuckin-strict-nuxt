@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createEventBus } from './eventBus.impl'
-import { TodoId, TodoEvent } from '../domain/todo.impl'
+import { todoId, todoEvent } from '../domain/todo.impl'
 
 describe('EventBus', () => {
   it('publishes events to subscribers', () => {
@@ -8,8 +8,8 @@ describe('EventBus', () => {
     const handler = vi.fn()
     bus.subscribe(handler)
 
-    const id = TodoId.generate()
-    const event = TodoEvent.created(id)
+    const id = todoId.generate()
+    const event = todoEvent.created(id)
     bus.publish(event)
 
     expect(handler).toHaveBeenCalledWith(event)
@@ -23,7 +23,7 @@ describe('EventBus', () => {
     bus.subscribe(h1)
     bus.subscribe(h2)
 
-    const event = TodoEvent.created(TodoId.generate())
+    const event = todoEvent.created(todoId.generate())
     bus.publish(event)
 
     expect(h1).toHaveBeenCalledWith(event)
@@ -37,7 +37,7 @@ describe('EventBus', () => {
 
     unsub()
 
-    bus.publish(TodoEvent.created(TodoId.generate()))
+    bus.publish(todoEvent.created(todoId.generate()))
     expect(handler).not.toHaveBeenCalled()
   })
 
@@ -46,10 +46,10 @@ describe('EventBus', () => {
     const handler = vi.fn()
     bus.subscribe(handler)
 
-    const id = TodoId.generate()
-    bus.publish(TodoEvent.created(id))
-    bus.publish(TodoEvent.completed(id))
-    bus.publish(TodoEvent.archived(id))
+    const id = todoId.generate()
+    bus.publish(todoEvent.created(id))
+    bus.publish(todoEvent.completed(id))
+    bus.publish(todoEvent.archived(id))
 
     expect(handler).toHaveBeenCalledTimes(3)
   })

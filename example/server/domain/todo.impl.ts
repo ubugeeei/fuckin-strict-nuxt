@@ -44,13 +44,13 @@ export type {
  *
  */
 
-export const TodoId: TodoIdOps = {
+export const todoId: TodoIdOps = {
   generate: () => unsafeCoerce(`todo-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`),
   parse: v => (v.startsWith('todo-') ? ok(unsafeCoerce(v)) : err('Invalid TodoId')),
   unwrap: id => unwrap(id),
 }
 
-export const TodoTitle: TodoTitleOps = {
+export const todoTitle: TodoTitleOps = {
   create: (v) => {
     const t = v.trim()
     if (!t) return err('Title required')
@@ -60,7 +60,7 @@ export const TodoTitle: TodoTitleOps = {
   unwrap: t => unwrap(t),
 }
 
-export const TodoDescription: TodoDescriptionOps = {
+export const todoDescription: TodoDescriptionOps = {
   create: (v) => {
     if (!v?.trim()) return ok(undefined)
     if (v.length > 500) return err('Description too long')
@@ -69,7 +69,7 @@ export const TodoDescription: TodoDescriptionOps = {
   unwrap: d => unwrap(d),
 }
 
-export const Priority: PriorityOps = {
+export const priority: PriorityOps = {
   create: (v) => {
     if (!v) return ok('Medium')
     if (['Low', 'Medium', 'High'].includes(v)) return ok(v as Priority)
@@ -77,7 +77,7 @@ export const Priority: PriorityOps = {
   },
 }
 
-export const Timestamp: TimestampOps = {
+export const timestamp: TimestampOps = {
   now: () => unsafeCoerce(new Date()),
   toISO: t => unwrap(t).toISOString(),
 }
@@ -88,19 +88,19 @@ export const Timestamp: TimestampOps = {
  *
  */
 
-export const createTodo: CreateTodo = (id, title, description, priority) => ({
+export const createTodo: CreateTodo = (id, title, description, prio) => ({
   _tag: 'Active',
   id,
   title,
   description,
-  priority,
-  createdAt: Timestamp.now(),
+  priority: prio,
+  createdAt: timestamp.now(),
 })
 
 export const completeTodo: CompleteTodo = t => ({
   ...t,
   _tag: 'Completed',
-  completedAt: Timestamp.now(),
+  completedAt: timestamp.now(),
 })
 
 export const reopenTodo: ReopenTodo = t => ({
@@ -119,18 +119,18 @@ export const archiveTodo: ArchiveTodo = t => ({
   priority: t.priority,
   createdAt: t.createdAt,
   _tag: 'Archived',
-  archivedAt: Timestamp.now(),
+  archivedAt: timestamp.now(),
 })
 
 export const toDTO: ToDTO = t => ({
-  id: TodoId.unwrap(t.id),
-  title: TodoTitle.unwrap(t.title),
-  description: t.description ? TodoDescription.unwrap(t.description) : undefined,
+  id: todoId.unwrap(t.id),
+  title: todoTitle.unwrap(t.title),
+  description: t.description ? todoDescription.unwrap(t.description) : undefined,
   priority: t.priority,
   status: t._tag,
-  createdAt: Timestamp.toISO(t.createdAt),
-  completedAt: t._tag === 'Completed' ? Timestamp.toISO(t.completedAt) : undefined,
-  archivedAt: t._tag === 'Archived' ? Timestamp.toISO(t.archivedAt) : undefined,
+  createdAt: timestamp.toISO(t.createdAt),
+  completedAt: t._tag === 'Completed' ? timestamp.toISO(t.completedAt) : undefined,
+  archivedAt: t._tag === 'Archived' ? timestamp.toISO(t.archivedAt) : undefined,
 })
 
 /*
@@ -139,9 +139,9 @@ export const toDTO: ToDTO = t => ({
  *
  */
 
-export const TodoEvent: TodoEventOps = {
-  created: id => ({ type: 'Created', todoId: id, at: Timestamp.now() }),
-  completed: id => ({ type: 'Completed', todoId: id, at: Timestamp.now() }),
-  reopened: id => ({ type: 'Reopened', todoId: id, at: Timestamp.now() }),
-  archived: id => ({ type: 'Archived', todoId: id, at: Timestamp.now() }),
+export const todoEvent: TodoEventOps = {
+  created: id => ({ type: 'Created', todoId: id, at: timestamp.now() }),
+  completed: id => ({ type: 'Completed', todoId: id, at: timestamp.now() }),
+  reopened: id => ({ type: 'Reopened', todoId: id, at: timestamp.now() }),
+  archived: id => ({ type: 'Archived', todoId: id, at: timestamp.now() }),
 }

@@ -4,7 +4,7 @@ import * as Query from './todo.impl.query'
 import { createTodoRepository } from '../infrastructure/todoRepository.impl'
 import { createEventBus } from '../infrastructure/eventBus.impl'
 import { createUoW } from './uow.impl'
-import { TodoId, TodoTitle, Timestamp, createTodo, completeTodo } from '../domain/todo.impl'
+import { todoId, todoTitle, timestamp, createTodo, completeTodo } from '../domain/todo.impl'
 import type { ArchivedTodo } from '../domain/todo.def'
 
 /*
@@ -66,8 +66,8 @@ describe('complete', () => {
   const setup = async () => {
     const repo = createTodoRepository()
     const bus = createEventBus()
-    const id = TodoId.generate()
-    const title = TodoTitle.create('Test')
+    const id = todoId.generate()
+    const title = todoTitle.create('Test')
     if (!title.ok) throw new Error()
     const todo = createTodo(id, title.value, undefined, 'Medium')
     await repo.save(todo).run()
@@ -76,7 +76,7 @@ describe('complete', () => {
       repo,
       bus,
       uow,
-      id: TodoId.unwrap(id),
+      id: todoId.unwrap(id),
       workflow: Command.complete(repo)(uow),
     }
   }
@@ -115,8 +115,8 @@ describe('reopen', () => {
   const setup = async () => {
     const repo = createTodoRepository()
     const bus = createEventBus()
-    const id = TodoId.generate()
-    const title = TodoTitle.create('Test')
+    const id = todoId.generate()
+    const title = todoTitle.create('Test')
     if (!title.ok) throw new Error()
     const todo = createTodo(id, title.value, undefined, 'Medium')
     const completed = completeTodo(todo)
@@ -126,7 +126,7 @@ describe('reopen', () => {
       repo,
       bus,
       uow,
-      id: TodoId.unwrap(id),
+      id: todoId.unwrap(id),
       workflow: Command.reopen(repo)(uow),
     }
   }
@@ -142,13 +142,13 @@ describe('reopen', () => {
   it('fails for active todo', async () => {
     const repo = createTodoRepository()
     const bus = createEventBus()
-    const id = TodoId.generate()
-    const title = TodoTitle.create('Test')
+    const id = todoId.generate()
+    const title = todoTitle.create('Test')
     if (!title.ok) throw new Error()
     const todo = createTodo(id, title.value, undefined, 'Medium')
     await repo.save(todo).run()
     const uow = createUoW(bus)
-    const r = await Command.reopen(repo)(uow)(TodoId.unwrap(id)).run()
+    const r = await Command.reopen(repo)(uow)(todoId.unwrap(id)).run()
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.error._tag).toBe('InvalidState')
   })
@@ -164,13 +164,13 @@ describe('archive', () => {
   it('archives active todo', async () => {
     const repo = createTodoRepository()
     const bus = createEventBus()
-    const id = TodoId.generate()
-    const title = TodoTitle.create('Test')
+    const id = todoId.generate()
+    const title = todoTitle.create('Test')
     if (!title.ok) throw new Error()
     const todo = createTodo(id, title.value, undefined, 'Medium')
     await repo.save(todo).run()
     const uow = createUoW(bus)
-    const r = await Command.archive(repo)(uow)(TodoId.unwrap(id)).run()
+    const r = await Command.archive(repo)(uow)(todoId.unwrap(id)).run()
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.value.status).toBe('Archived')
   })
@@ -178,8 +178,8 @@ describe('archive', () => {
   it('fails for already archived', async () => {
     const repo = createTodoRepository()
     const bus = createEventBus()
-    const id = TodoId.generate()
-    const title = TodoTitle.create('Test')
+    const id = todoId.generate()
+    const title = todoTitle.create('Test')
     if (!title.ok) throw new Error()
     const todo = createTodo(id, title.value, undefined, 'Medium')
     const archived: ArchivedTodo = {
@@ -189,11 +189,11 @@ describe('archive', () => {
       description: todo.description,
       priority: todo.priority,
       createdAt: todo.createdAt,
-      archivedAt: Timestamp.now(),
+      archivedAt: timestamp.now(),
     }
     await repo.save(archived).run()
     const uow = createUoW(bus)
-    const r = await Command.archive(repo)(uow)(TodoId.unwrap(id)).run()
+    const r = await Command.archive(repo)(uow)(todoId.unwrap(id)).run()
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.error._tag).toBe('InvalidState')
   })
@@ -208,13 +208,13 @@ describe('archive', () => {
 describe('getAll', () => {
   it('returns all todos sorted by createdAt', async () => {
     const repo = createTodoRepository()
-    const title1 = TodoTitle.create('First')
-    const title2 = TodoTitle.create('Second')
+    const title1 = todoTitle.create('First')
+    const title2 = todoTitle.create('Second')
     if (!title1.ok || !title2.ok) throw new Error()
 
-    const todo1 = createTodo(TodoId.generate(), title1.value, undefined, 'Low')
+    const todo1 = createTodo(todoId.generate(), title1.value, undefined, 'Low')
     await new Promise(r => setTimeout(r, 10))
-    const todo2 = createTodo(TodoId.generate(), title2.value, undefined, 'High')
+    const todo2 = createTodo(todoId.generate(), title2.value, undefined, 'High')
 
     await repo.save(todo1).run()
     await repo.save(todo2).run()
@@ -229,9 +229,9 @@ describe('getAll', () => {
 
   it('excludes archived by default', async () => {
     const repo = createTodoRepository()
-    const title = TodoTitle.create('Test')
+    const title = todoTitle.create('Test')
     if (!title.ok) throw new Error()
-    const todo = createTodo(TodoId.generate(), title.value, undefined, 'Medium')
+    const todo = createTodo(todoId.generate(), title.value, undefined, 'Medium')
     const archived: ArchivedTodo = {
       _tag: 'Archived',
       id: todo.id,
@@ -239,7 +239,7 @@ describe('getAll', () => {
       description: todo.description,
       priority: todo.priority,
       createdAt: todo.createdAt,
-      archivedAt: Timestamp.now(),
+      archivedAt: timestamp.now(),
     }
     await repo.save(archived).run()
 

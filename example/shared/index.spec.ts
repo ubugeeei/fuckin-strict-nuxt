@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { unsafeCoerce, unwrap, ok, err, type Eff } from './index.impl'
+import { unsafeCoerce, unwrap, ok, err, eff } from './index.impl'
 import type { NewType } from './index.def'
 
 describe('NewType', () => {
@@ -32,68 +32,68 @@ describe('Result', () => {
 
 describe('Eff', () => {
   it('succeed returns success', async () => {
-    const eff = Eff.succeed(42)
-    const r = await eff.run()
+    const e = eff.succeed(42)
+    const r = await e.run()
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.value).toBe(42)
   })
 
   it('fail returns failure', async () => {
-    const eff = Eff.fail('error')
-    const r = await eff.run()
+    const e = eff.fail('error')
+    const r = await e.run()
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.error).toBe('error')
   })
 
   it('map transforms success value', async () => {
-    const eff = Eff.map(Eff.succeed(2), x => x * 3)
-    const r = await eff.run()
+    const e = eff.map(eff.succeed(2), x => x * 3)
+    const r = await e.run()
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.value).toBe(6)
   })
 
   it('map propagates failure', async () => {
-    const eff = Eff.map(
-      Eff.fail('err') as ReturnType<typeof Eff.fail<string>>,
+    const e = eff.map(
+      eff.fail('err') as ReturnType<typeof eff.fail<string>>,
       (x: number) => x * 3,
     )
-    const r = await eff.run()
+    const r = await e.run()
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.error).toBe('err')
   })
 
   it('flatMap chains effects', async () => {
-    const eff = Eff.flatMap(Eff.succeed(2), x => Eff.succeed(x * 3))
-    const r = await eff.run()
+    const e = eff.flatMap(eff.succeed(2), x => eff.succeed(x * 3))
+    const r = await e.run()
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.value).toBe(6)
   })
 
   it('flatMap short-circuits on failure', async () => {
-    const eff = Eff.flatMap(Eff.fail('err') as ReturnType<typeof Eff.fail<string>>, (x: number) =>
-      Eff.succeed(x * 3),
+    const e = eff.flatMap(eff.fail('err') as ReturnType<typeof eff.fail<string>>, (x: number) =>
+      eff.succeed(x * 3),
     )
-    const r = await eff.run()
+    const r = await e.run()
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.error).toBe('err')
   })
 
   it('fromPromise handles success', async () => {
-    const eff = Eff.fromPromise(
+    const e = eff.fromPromise(
       () => Promise.resolve(42),
       () => 'error',
     )
-    const r = await eff.run()
+    const r = await e.run()
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.value).toBe(42)
   })
 
   it('fromPromise handles rejection', async () => {
-    const eff = Eff.fromPromise(
+    const e = eff.fromPromise(
       () => Promise.reject(new Error('fail')),
       e => (e as Error).message,
     )
-    const r = await eff.run()
+    const r = await e.run()
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.error).toBe('fail')
   })

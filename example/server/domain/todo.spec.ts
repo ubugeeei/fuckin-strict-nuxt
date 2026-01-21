@@ -1,91 +1,90 @@
 import { describe, it, expect } from 'vitest'
 import {
-  TodoId,
-  TodoTitle,
-  TodoDescription,
-  Priority,
-  Timestamp,
+  todoId,
+  todoTitle,
+  todoDescription,
+  priority,
   createTodo,
   completeTodo,
   reopenTodo,
   archiveTodo,
   toDTO,
-  TodoEvent,
+  todoEvent,
 } from './todo.impl'
 
 describe('TodoId', () => {
   it('generate creates valid id', () => {
-    const id = TodoId.generate()
-    expect(TodoId.unwrap(id)).toMatch(/^todo-\d+-\w+$/)
+    const id = todoId.generate()
+    expect(todoId.unwrap(id)).toMatch(/^todo-\d+-\w+$/)
   })
 
   it('parse validates format', () => {
-    const r1 = TodoId.parse('todo-123-abc')
+    const r1 = todoId.parse('todo-123-abc')
     expect(r1.ok).toBe(true)
 
-    const r2 = TodoId.parse('invalid-id')
+    const r2 = todoId.parse('invalid-id')
     expect(r2.ok).toBe(false)
   })
 })
 
 describe('TodoTitle', () => {
   it('create trims and validates', () => {
-    const r1 = TodoTitle.create('  Test  ')
+    const r1 = todoTitle.create('  Test  ')
     expect(r1.ok).toBe(true)
-    if (r1.ok) expect(TodoTitle.unwrap(r1.value)).toBe('Test')
+    if (r1.ok) expect(todoTitle.unwrap(r1.value)).toBe('Test')
   })
 
   it('rejects empty title', () => {
-    const r = TodoTitle.create('   ')
+    const r = todoTitle.create('   ')
     expect(r.ok).toBe(false)
   })
 
   it('rejects too long title', () => {
-    const r = TodoTitle.create('a'.repeat(101))
+    const r = todoTitle.create('a'.repeat(101))
     expect(r.ok).toBe(false)
   })
 })
 
 describe('TodoDescription', () => {
   it('allows undefined', () => {
-    const r = TodoDescription.create(undefined)
+    const r = todoDescription.create(undefined)
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.value).toBeUndefined()
   })
 
   it('creates valid description', () => {
-    const r = TodoDescription.create('Test description')
+    const r = todoDescription.create('Test description')
     expect(r.ok).toBe(true)
   })
 
   it('rejects too long description', () => {
-    const r = TodoDescription.create('a'.repeat(501))
+    const r = todoDescription.create('a'.repeat(501))
     expect(r.ok).toBe(false)
   })
 })
 
 describe('Priority', () => {
   it('defaults to Medium', () => {
-    const r = Priority.create(undefined)
+    const r = priority.create(undefined)
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.value).toBe('Medium')
   })
 
   it('accepts valid priorities', () => {
-    expect(Priority.create('Low').ok).toBe(true)
-    expect(Priority.create('High').ok).toBe(true)
+    expect(priority.create('Low').ok).toBe(true)
+    expect(priority.create('High').ok).toBe(true)
   })
 
   it('rejects invalid priority', () => {
-    const r = Priority.create('Invalid')
+    const r = priority.create('Invalid')
     expect(r.ok).toBe(false)
   })
 })
 
 describe('Entity State Transitions', () => {
   const makeActive = () => {
-    const id = TodoId.generate()
-    const title = TodoTitle.create('Test')
+    const id = todoId.generate()
+    const title = todoTitle.create('Test')
     if (!title.ok) throw new Error()
     return createTodo(id, title.value, undefined, 'Medium')
   }
@@ -128,13 +127,13 @@ describe('Entity State Transitions', () => {
 
 describe('toDTO', () => {
   it('converts ActiveTodo to DTO', () => {
-    const id = TodoId.generate()
-    const title = TodoTitle.create('Test')
+    const id = todoId.generate()
+    const title = todoTitle.create('Test')
     if (!title.ok) throw new Error()
     const todo = createTodo(id, title.value, undefined, 'High')
     const dto = toDTO(todo)
 
-    expect(dto.id).toBe(TodoId.unwrap(id))
+    expect(dto.id).toBe(todoId.unwrap(id))
     expect(dto.title).toBe('Test')
     expect(dto.priority).toBe('High')
     expect(dto.status).toBe('Active')
@@ -142,8 +141,8 @@ describe('toDTO', () => {
   })
 
   it('includes completedAt for CompletedTodo', () => {
-    const id = TodoId.generate()
-    const title = TodoTitle.create('Test')
+    const id = todoId.generate()
+    const title = todoTitle.create('Test')
     if (!title.ok) throw new Error()
     const active = createTodo(id, title.value, undefined, 'Medium')
     const completed = completeTodo(active)
@@ -156,27 +155,27 @@ describe('toDTO', () => {
 
 describe('TodoEvent', () => {
   it('created event', () => {
-    const id = TodoId.generate()
-    const e = TodoEvent.created(id)
+    const id = todoId.generate()
+    const e = todoEvent.created(id)
     expect(e.type).toBe('Created')
     expect(e.todoId).toBe(id)
   })
 
   it('completed event', () => {
-    const id = TodoId.generate()
-    const e = TodoEvent.completed(id)
+    const id = todoId.generate()
+    const e = todoEvent.completed(id)
     expect(e.type).toBe('Completed')
   })
 
   it('reopened event', () => {
-    const id = TodoId.generate()
-    const e = TodoEvent.reopened(id)
+    const id = todoId.generate()
+    const e = todoEvent.reopened(id)
     expect(e.type).toBe('Reopened')
   })
 
   it('archived event', () => {
-    const id = TodoId.generate()
-    const e = TodoEvent.archived(id)
+    const id = todoId.generate()
+    const e = todoEvent.archived(id)
     expect(e.type).toBe('Archived')
   })
 })

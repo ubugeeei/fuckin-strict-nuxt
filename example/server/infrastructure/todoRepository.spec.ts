@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { createTodoRepository } from './todoRepository.impl'
-import { TodoId, TodoTitle, createTodo, completeTodo } from '../domain/todo.impl'
+import { todoId, todoTitle, createTodo, completeTodo } from '../domain/todo.impl'
 
 describe('TodoRepository', () => {
   const makeTodo = () => {
-    const id = TodoId.generate()
-    const title = TodoTitle.create('Test')
+    const id = todoId.generate()
+    const title = todoTitle.create('Test')
     if (!title.ok) throw new Error()
     return createTodo(id, title.value, undefined, 'Medium')
   }
@@ -23,7 +23,7 @@ describe('TodoRepository', () => {
 
   it('findById returns undefined for non-existent', async () => {
     const repo = createTodoRepository()
-    const id = TodoId.generate()
+    const id = todoId.generate()
 
     const r = await repo.findById(id).run()
     expect(r.ok).toBe(true)
