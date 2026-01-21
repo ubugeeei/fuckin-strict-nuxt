@@ -11,7 +11,7 @@ import {
   archiveTodo,
   toDTO,
   TodoEvent,
-} from "./todo";
+} from "./todo.impl";
 
 describe("TodoId", () => {
   it("generate creates valid id", () => {
@@ -85,7 +85,7 @@ describe("Priority", () => {
 describe("Entity State Transitions", () => {
   const makeActive = () => {
     const id = TodoId.generate();
-    const title = TodoTitle.create("Test")!;
+    const title = TodoTitle.create("Test");
     if (!title.ok) throw new Error();
     return createTodo(id, title.value, undefined, "Medium");
   };
@@ -129,7 +129,7 @@ describe("Entity State Transitions", () => {
 describe("toDTO", () => {
   it("converts ActiveTodo to DTO", () => {
     const id = TodoId.generate();
-    const title = TodoTitle.create("Test")!;
+    const title = TodoTitle.create("Test");
     if (!title.ok) throw new Error();
     const todo = createTodo(id, title.value, undefined, "High");
     const dto = toDTO(todo);
@@ -143,7 +143,7 @@ describe("toDTO", () => {
 
   it("includes completedAt for CompletedTodo", () => {
     const id = TodoId.generate();
-    const title = TodoTitle.create("Test")!;
+    const title = TodoTitle.create("Test");
     if (!title.ok) throw new Error();
     const active = createTodo(id, title.value, undefined, "Medium");
     const completed = completeTodo(active);

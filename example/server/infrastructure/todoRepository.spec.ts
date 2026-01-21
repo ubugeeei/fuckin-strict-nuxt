@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { createTodoRepository } from "./todoRepository";
-import { TodoId, TodoTitle, createTodo, completeTodo } from "../domain/todo";
+import { createTodoRepository } from "./todoRepository.impl";
+import { TodoId, TodoTitle, createTodo, completeTodo } from "../domain/todo.impl";
 
 describe("TodoRepository", () => {
   const makeTodo = () => {

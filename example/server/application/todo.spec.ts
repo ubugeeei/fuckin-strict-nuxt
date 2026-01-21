@@ -1,35 +1,29 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  createTodoWorkflow,
-  completeTodoWorkflow,
-  reopenTodoWorkflow,
-  archiveTodoWorkflow,
-  getAllTodos,
-} from "./todo";
-import { createTodoRepository } from "../infrastructure/todoRepository";
-import { createEventBus } from "../infrastructure/eventBus";
-import { createUoW } from "./uow";
-import {
-  TodoId,
-  TodoTitle,
-  Timestamp,
-  createTodo,
-  completeTodo,
-} from "../domain/todo";
-import type { CompletedTodo, ArchivedTodo } from "../domain/todo";
+import { describe, it, expect } from "vitest";
+import * as Command from "./todo.impl.cmd";
+import * as Query from "./todo.impl.query";
+import { createTodoRepository } from "../infrastructure/todoRepository.impl";
+import { createEventBus } from "../infrastructure/eventBus.impl";
+import { createUoW } from "./uow.impl";
+import { TodoId, TodoTitle, Timestamp, createTodo, completeTodo } from "../domain/todo.impl";
+import type { ArchivedTodo } from "../domain/todo.def";
 
-describe("createTodoWorkflow", () => {
+/*
+ *
+ * create
+ *
+ */
+
+describe("create", () => {
   const setup = () => {
     const repo = createTodoRepository();
     const bus = createEventBus();
-    const workflow = createTodoWorkflow(repo);
     const uow = createUoW(bus);
-    return { repo, bus, workflow, uow };
+    return { repo, bus, uow, workflow: Command.create(repo)(uow) };
   };
 
   it("creates todo with valid input", async () => {
     const { workflow, uow } = setup();
-    const r = await workflow({ title: "Test", priority: "High" }, uow).run();
+    const r = await workflow({ title: "Test", priority: "High" }).run();
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.value.title).toBe("Test");
@@ -41,26 +35,34 @@ describe("createTodoWorkflow", () => {
   });
 
   it("fails with empty title", async () => {
-    const { workflow, uow } = setup();
-    const r = await workflow({ title: "" }, uow).run();
+    const { workflow } = setup();
+    const r = await workflow({ title: "" }).run();
     expect(r.ok).toBe(false);
     if (!r.ok) {
-      expect(r.error.type).toBe("Validation");
-      expect(r.error.errors).toContainEqual({
-        field: "title",
-        message: "Title required",
-      });
+      expect(r.error._tag).toBe("Validation");
+      if (r.error._tag === "Validation") {
+        expect(r.error.errors).toContainEqual({
+          field: "title",
+          message: "Title required",
+        });
+      }
     }
   });
 
   it("fails with invalid priority", async () => {
-    const { workflow, uow } = setup();
-    const r = await workflow({ title: "Test", priority: "Invalid" }, uow).run();
+    const { workflow } = setup();
+    const r = await workflow({ title: "Test", priority: "Invalid" }).run();
     expect(r.ok).toBe(false);
   });
 });
 
-describe("completeTodoWorkflow", () => {
+/*
+ *
+ * complete
+ *
+ */
+
+describe("complete", () => {
   const setup = async () => {
     const repo = createTodoRepository();
     const bus = createEventBus();
@@ -69,18 +71,19 @@ describe("completeTodoWorkflow", () => {
     if (!title.ok) throw new Error();
     const todo = createTodo(id, title.value, undefined, "Medium");
     await repo.save(todo).run();
+    const uow = createUoW(bus);
     return {
       repo,
       bus,
+      uow,
       id: TodoId.unwrap(id),
-      workflow: completeTodoWorkflow(repo),
+      workflow: Command.complete(repo)(uow),
     };
   };
 
   it("completes active todo", async () => {
-    const { bus, id, workflow } = await setup();
-    const uow = createUoW(bus);
-    const r = await workflow(id, uow).run();
+    const { uow, id, workflow } = await setup();
+    const r = await workflow(id).run();
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value.status).toBe("Completed");
     expect(uow.events).toHaveLength(1);
@@ -88,23 +91,27 @@ describe("completeTodoWorkflow", () => {
   });
 
   it("fails for non-existent todo", async () => {
-    const { bus, workflow } = await setup();
-    const uow = createUoW(bus);
-    const r = await workflow("todo-nonexistent-abc", uow).run();
+    const { workflow } = await setup();
+    const r = await workflow("todo-nonexistent-abc").run();
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error.type).toBe("NotFound");
+    if (!r.ok) expect(r.error._tag).toBe("NotFound");
   });
 
   it("fails for invalid id format", async () => {
-    const { bus, workflow } = await setup();
-    const uow = createUoW(bus);
-    const r = await workflow("invalid", uow).run();
+    const { workflow } = await setup();
+    const r = await workflow("invalid").run();
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error.type).toBe("InvalidId");
+    if (!r.ok) expect(r.error._tag).toBe("InvalidId");
   });
 });
 
-describe("reopenTodoWorkflow", () => {
+/*
+ *
+ * reopen
+ *
+ */
+
+describe("reopen", () => {
   const setup = async () => {
     const repo = createTodoRepository();
     const bus = createEventBus();
@@ -114,18 +121,19 @@ describe("reopenTodoWorkflow", () => {
     const todo = createTodo(id, title.value, undefined, "Medium");
     const completed = completeTodo(todo);
     await repo.save(completed).run();
+    const uow = createUoW(bus);
     return {
       repo,
       bus,
+      uow,
       id: TodoId.unwrap(id),
-      workflow: reopenTodoWorkflow(repo),
+      workflow: Command.reopen(repo)(uow),
     };
   };
 
   it("reopens completed todo", async () => {
-    const { bus, id, workflow } = await setup();
-    const uow = createUoW(bus);
-    const r = await workflow(id, uow).run();
+    const { uow, id, workflow } = await setup();
+    const r = await workflow(id).run();
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value.status).toBe("Active");
     expect(uow.events[0]!.type).toBe("Reopened");
@@ -140,13 +148,19 @@ describe("reopenTodoWorkflow", () => {
     const todo = createTodo(id, title.value, undefined, "Medium");
     await repo.save(todo).run();
     const uow = createUoW(bus);
-    const r = await reopenTodoWorkflow(repo)(TodoId.unwrap(id), uow).run();
+    const r = await Command.reopen(repo)(uow)(TodoId.unwrap(id)).run();
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error.type).toBe("InvalidState");
+    if (!r.ok) expect(r.error._tag).toBe("InvalidState");
   });
 });
 
-describe("archiveTodoWorkflow", () => {
+/*
+ *
+ * archive
+ *
+ */
+
+describe("archive", () => {
   it("archives active todo", async () => {
     const repo = createTodoRepository();
     const bus = createEventBus();
@@ -156,7 +170,7 @@ describe("archiveTodoWorkflow", () => {
     const todo = createTodo(id, title.value, undefined, "Medium");
     await repo.save(todo).run();
     const uow = createUoW(bus);
-    const r = await archiveTodoWorkflow(repo)(TodoId.unwrap(id), uow).run();
+    const r = await Command.archive(repo)(uow)(TodoId.unwrap(id)).run();
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value.status).toBe("Archived");
   });
@@ -179,13 +193,19 @@ describe("archiveTodoWorkflow", () => {
     };
     await repo.save(archived).run();
     const uow = createUoW(bus);
-    const r = await archiveTodoWorkflow(repo)(TodoId.unwrap(id), uow).run();
+    const r = await Command.archive(repo)(uow)(TodoId.unwrap(id)).run();
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error.type).toBe("InvalidState");
+    if (!r.ok) expect(r.error._tag).toBe("InvalidState");
   });
 });
 
-describe("getAllTodos", () => {
+/*
+ *
+ * getAll
+ *
+ */
+
+describe("getAll", () => {
   it("returns all todos sorted by createdAt", async () => {
     const repo = createTodoRepository();
     const title1 = TodoTitle.create("First");
@@ -194,17 +214,12 @@ describe("getAllTodos", () => {
 
     const todo1 = createTodo(TodoId.generate(), title1.value, undefined, "Low");
     await new Promise((r) => setTimeout(r, 10));
-    const todo2 = createTodo(
-      TodoId.generate(),
-      title2.value,
-      undefined,
-      "High",
-    );
+    const todo2 = createTodo(TodoId.generate(), title2.value, undefined, "High");
 
     await repo.save(todo1).run();
     await repo.save(todo2).run();
 
-    const r = await getAllTodos(repo)(false).run();
+    const r = await Query.getAll(repo)(false).run();
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.value).toHaveLength(2);
@@ -216,12 +231,7 @@ describe("getAllTodos", () => {
     const repo = createTodoRepository();
     const title = TodoTitle.create("Test");
     if (!title.ok) throw new Error();
-    const todo = createTodo(
-      TodoId.generate(),
-      title.value,
-      undefined,
-      "Medium",
-    );
+    const todo = createTodo(TodoId.generate(), title.value, undefined, "Medium");
     const archived: ArchivedTodo = {
       _tag: "Archived",
       id: todo.id,
@@ -233,7 +243,7 @@ describe("getAllTodos", () => {
     };
     await repo.save(archived).run();
 
-    const r = await getAllTodos(repo)(true).run();
+    const r = await Query.getAll(repo)(true).run();
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value).toHaveLength(0);
   });

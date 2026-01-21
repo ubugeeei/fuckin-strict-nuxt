@@ -1,13 +1,14 @@
-import { createEventBus } from "./infrastructure/eventBus";
-import { createTodoRepository } from "./infrastructure/todoRepository";
-import { createUoW } from "./application/uow";
-import {
-  createTodoWorkflow,
-  completeTodoWorkflow,
-  reopenTodoWorkflow,
-  archiveTodoWorkflow,
-  getAllTodos,
-} from "./application/todo";
+import { createEventBus } from "./infrastructure/eventBus.impl";
+import { createTodoRepository } from "./infrastructure/todoRepository.impl";
+import { createUoW } from "./application/uow.impl";
+import * as Command from "./application/todo.impl.cmd";
+import * as Query from "./application/todo.impl.query";
+
+/*
+ *
+ * Container
+ *
+ */
 
 const repo = createTodoRepository();
 const bus = createEventBus();
@@ -15,15 +16,14 @@ const bus = createEventBus();
 bus.subscribe((e) => console.log(`[Event] ${e.type}:`, e.todoId));
 
 export const container = {
-  repo,
-  bus,
   createUoW: () => createUoW(bus),
-  // queries
-  getAllTodos: getAllTodos(repo),
-
-  // commands
-  createTodo: createTodoWorkflow(repo),
-  completeTodo: completeTodoWorkflow(repo),
-  reopenTodo: reopenTodoWorkflow(repo),
-  archiveTodo: archiveTodoWorkflow(repo),
+  command: {
+    create: Command.create(repo),
+    complete: Command.complete(repo),
+    reopen: Command.reopen(repo),
+    archive: Command.archive(repo),
+  },
+  query: {
+    getAll: Query.getAll(repo),
+  },
 };

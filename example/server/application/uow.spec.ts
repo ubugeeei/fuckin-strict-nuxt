@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
-import { createUoW } from "./uow";
-import { createEventBus } from "../infrastructure/eventBus";
-import { TodoId, TodoEvent } from "../domain/todo";
+import { createUoW } from "./uow.impl";
+import { createEventBus } from "../infrastructure/eventBus.impl";
+import { TodoId, TodoEvent } from "../domain/todo.impl";
 
 describe("UnitOfWork", () => {
   it("collects events", () => {

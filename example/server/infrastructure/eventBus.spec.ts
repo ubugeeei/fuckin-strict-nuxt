@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { createEventBus } from "./eventBus";
-import { TodoId, TodoEvent } from "../domain/todo";
+import { createEventBus } from "./eventBus.impl";
+import { TodoId, TodoEvent } from "../domain/todo.impl";
 
 describe("EventBus", () => {
   it("publishes events to subscribers", () => {

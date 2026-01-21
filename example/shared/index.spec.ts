@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { unsafeCoerce, unwrap, ok, err, Eff, type NewType } from "./shared";
+import { unsafeCoerce, unwrap, ok, err, Eff } from "./index.impl";
+import type { NewType } from "./index.def";
 
-describe("NewType Type", () => {
+describe("NewType", () => {
   type TestBrand = NewType<string, "Test">;
 
   it("unsafeCoerce creates branded value", () => {
@@ -69,9 +70,8 @@ describe("Eff", () => {
   });
 
   it("flatMap short-circuits on failure", async () => {
-    const eff = Eff.flatMap(
-      Eff.fail("err") as ReturnType<typeof Eff.fail<string>>,
-      (x: number) => Eff.succeed(x * 3),
+    const eff = Eff.flatMap(Eff.fail("err") as ReturnType<typeof Eff.fail<string>>, (x: number) =>
+      Eff.succeed(x * 3),
     );
     const r = await eff.run();
     expect(r.ok).toBe(false);
