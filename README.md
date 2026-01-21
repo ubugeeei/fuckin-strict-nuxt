@@ -1,4 +1,4 @@
-# dmmf-book
+# dmmf
 
 ## Reference
 
