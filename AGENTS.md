@@ -123,7 +123,7 @@ All commands must pass with zero errors.
 - Use discriminated unions for state machines
 - Prefer `type` over `interface`
 - No `is` type predicates (TypeScript infers narrowing)
-- Use branded types for domain IDs: `type TodoId = NewType<string, "TodoId">`
+- Use branded types for domain IDs: `type TodoId = newType<string, "TodoId">`
 - **Always annotate function return types explicitly**
 
 ### Vue

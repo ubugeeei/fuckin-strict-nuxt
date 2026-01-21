@@ -8,6 +8,7 @@ import type {
   TodoId,
   TodoTitle,
   TodoDescription,
+  Timestamp,
   ActiveTodo,
   CompletedTodo,
   ArchivedTodo,
@@ -53,7 +54,7 @@ export const fromDTO = (dto: TodoDTO): Todo => {
       ? unsafeCoerce<string, "TodoDescription">(dto.description)
       : undefined,
     priority: dto.priority,
-    createdAt: new Date(dto.createdAt),
+    createdAt: unsafeCoerce<Date, "Timestamp">(new Date(dto.createdAt)),
   };
 
   switch (dto.status) {
@@ -63,13 +64,13 @@ export const fromDTO = (dto: TodoDTO): Todo => {
       return {
         ...base,
         status: "Completed",
-        completedAt: new Date(dto.completedAt!),
+        completedAt: unsafeCoerce<Date, "Timestamp">(new Date(dto.completedAt!)),
       } as CompletedTodo;
     case "Archived":
       return {
         ...base,
         status: "Archived",
-        archivedAt: new Date(dto.archivedAt!),
+        archivedAt: unsafeCoerce<Date, "Timestamp">(new Date(dto.archivedAt!)),
       } as ArchivedTodo;
     default:
       throw new Error(`Unknown status: ${dto.status}`);
@@ -117,3 +118,4 @@ export const priorityColor = (priority: "Low" | "Medium" | "High"): string => {
 export const unwrapId = (id: TodoId): string => id as string;
 export const unwrapTitle = (title: TodoTitle): string => title as string;
 export const unwrapDescription = (desc: TodoDescription): string => desc as string;
+export const unwrapTimestamp = (ts: Timestamp): Date => ts as Date;

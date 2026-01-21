@@ -50,7 +50,7 @@ export const complete: Complete = (repo) => (uow) => (id) => {
 
   return fm(repo.findById(parsed.value), (t): Eff<TodoDTO, CommandError> => {
     if (!t) return fail(Err.notFound());
-    if (t._tag !== "Active") return fail(Err.invalidState("Active", t._tag));
+    if (t.status !== "Active") return fail(Err.invalidState("Active", t.status));
     return m(repo.save(completeTodo(t)), (s) => {
       uow.events.push(todoEvent.completed(s.id));
       return toDTO(s);
@@ -64,7 +64,7 @@ export const reopen: Reopen = (repo) => (uow) => (id) => {
 
   return fm(repo.findById(parsed.value), (t): Eff<TodoDTO, CommandError> => {
     if (!t) return fail(Err.notFound());
-    if (t._tag !== "Completed") return fail(Err.invalidState("Completed", t._tag));
+    if (t.status !== "Completed") return fail(Err.invalidState("Completed", t.status));
     return m(repo.save(reopenTodo(t)), (s) => {
       uow.events.push(todoEvent.reopened(s.id));
       return toDTO(s);
@@ -78,7 +78,7 @@ export const archive: Archive = (repo) => (uow) => (id) => {
 
   return fm(repo.findById(parsed.value), (t): Eff<TodoDTO, CommandError> => {
     if (!t) return fail(Err.notFound());
-    if (t._tag === "Archived") return fail(Err.invalidState("Active|Completed", t._tag));
+    if (t.status === "Archived") return fail(Err.invalidState("Active|Completed", t.status));
     return m(repo.save(archiveTodo(t)), (s) => {
       uow.events.push(todoEvent.archived(s.id));
       return toDTO(s);

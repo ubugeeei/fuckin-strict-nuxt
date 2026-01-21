@@ -80,7 +80,7 @@ export type Timestamp = newType<Date, "Timestamp">;
  * Initial state for all new todos.
  */
 export type ActiveTodo = {
-  _tag: "Active";
+  status: "Active";
   id: TodoId;
   title: TodoTitle;
   description?: TodoDescription;
@@ -92,8 +92,8 @@ export type ActiveTodo = {
  * A todo that has been marked as done.
  * Can be reopened to return to Active state.
  */
-export type CompletedTodo = Omit<ActiveTodo, "_tag"> & {
-  _tag: "Completed";
+export type CompletedTodo = Omit<ActiveTodo, "status"> & {
+  status: "Completed";
   completedAt: Timestamp;
 };
 
@@ -102,7 +102,7 @@ export type CompletedTodo = Omit<ActiveTodo, "_tag"> & {
  * Terminal state - cannot be restored.
  */
 export type ArchivedTodo = {
-  _tag: "Archived";
+  status: "Archived";
   id: TodoId;
   title: TodoTitle;
   description?: TodoDescription;

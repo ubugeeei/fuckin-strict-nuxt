@@ -89,7 +89,7 @@ export const timestamp: TimestampOps = {
  */
 
 export const createTodo: CreateTodo = (id, title, description, prio) => ({
-  _tag: "Active",
+  status: "Active",
   id,
   title,
   description,
@@ -99,7 +99,7 @@ export const createTodo: CreateTodo = (id, title, description, prio) => ({
 
 export const completeTodo: CompleteTodo = (t) => ({
   ...t,
-  _tag: "Completed",
+  status: "Completed",
   completedAt: timestamp.now(),
 });
 
@@ -109,7 +109,7 @@ export const reopenTodo: ReopenTodo = (t) => ({
   description: t.description,
   priority: t.priority,
   createdAt: t.createdAt,
-  _tag: "Active",
+  status: "Active",
 });
 
 export const archiveTodo: ArchiveTodo = (t) => ({
@@ -118,7 +118,7 @@ export const archiveTodo: ArchiveTodo = (t) => ({
   description: t.description,
   priority: t.priority,
   createdAt: t.createdAt,
-  _tag: "Archived",
+  status: "Archived",
   archivedAt: timestamp.now(),
 });
 
@@ -127,10 +127,10 @@ export const toDTO: ToDTO = (t) => ({
   title: todoTitle.unwrap(t.title),
   description: t.description ? todoDescription.unwrap(t.description) : undefined,
   priority: t.priority,
-  status: t._tag,
+  status: t.status,
   createdAt: timestamp.toISO(t.createdAt),
-  completedAt: t._tag === "Completed" ? timestamp.toISO(t.completedAt) : undefined,
-  archivedAt: t._tag === "Archived" ? timestamp.toISO(t.archivedAt) : undefined,
+  completedAt: t.status === "Completed" ? timestamp.toISO(t.completedAt) : undefined,
+  archivedAt: t.status === "Archived" ? timestamp.toISO(t.archivedAt) : undefined,
 });
 
 /*

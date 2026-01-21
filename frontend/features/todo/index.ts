@@ -13,6 +13,7 @@ export type {
   ArchivedTodo,
   TodoFilter,
   Priority,
+  Timestamp,
 } from "./domain/todo.def";
 export type { TodoForm, ValidationError } from "./domain/form.def";
 export type { Async } from "./domain/async.def";
@@ -24,6 +25,7 @@ export {
   unwrapId,
   unwrapTitle,
   unwrapDescription,
+  unwrapTimestamp,
 } from "./domain/todo.impl";
 
 // API

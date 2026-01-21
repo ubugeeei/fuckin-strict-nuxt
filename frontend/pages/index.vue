@@ -103,7 +103,8 @@ function handleArchive(todo: Todo): void {
       <ul>
         <li><strong>State Machines:</strong> Form and Async states are explicit types</li>
         <li>
-          <strong>Make Illegal States Unrepresentable:</strong> Actions constrained by todo state
+          <strong>Make Illegal States Unrepresentable:</strong>
+          Actions constrained by todo state
         </li>
         <li><strong>Result Types:</strong> Errors as values, not exceptions</li>
         <li><strong>Smart Constructors:</strong> Validated value objects</li>

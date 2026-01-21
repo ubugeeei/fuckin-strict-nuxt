@@ -53,6 +53,6 @@ describe("TodoRepository", () => {
 
     const r = await repo.findById(todo.id).run();
     expect(r.ok).toBe(true);
-    if (r.ok && r.value) expect(r.value._tag).toBe("Completed");
+    if (r.ok && r.value) expect(r.value.status).toBe("Completed");
   });
 });

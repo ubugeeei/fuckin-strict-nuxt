@@ -183,7 +183,7 @@ describe("archive", () => {
     if (!title.ok) throw new Error();
     const todo = createTodo(id, title.value, undefined, "Medium");
     const archived: ArchivedTodo = {
-      _tag: "Archived",
+      status: "Archived",
       id: todo.id,
       title: todo.title,
       description: todo.description,
@@ -233,7 +233,7 @@ describe("getAll", () => {
     if (!title.ok) throw new Error();
     const todo = createTodo(todoId.generate(), title.value, undefined, "Medium");
     const archived: ArchivedTodo = {
-      _tag: "Archived",
+      status: "Archived",
       id: todo.id,
       title: todo.title,
       description: todo.description,

@@ -91,13 +91,13 @@ describe("Entity State Transitions", () => {
 
   it("createTodo creates ActiveTodo", () => {
     const todo = makeActive();
-    expect(todo._tag).toBe("Active");
+    expect(todo.status).toBe("Active");
   });
 
   it("completeTodo transitions to Completed", () => {
     const active = makeActive();
     const completed = completeTodo(active);
-    expect(completed._tag).toBe("Completed");
+    expect(completed.status).toBe("Completed");
     expect(completed.completedAt).toBeDefined();
   });
 
@@ -105,14 +105,14 @@ describe("Entity State Transitions", () => {
     const active = makeActive();
     const completed = completeTodo(active);
     const reopened = reopenTodo(completed);
-    expect(reopened._tag).toBe("Active");
+    expect(reopened.status).toBe("Active");
     expect("completedAt" in reopened).toBe(false);
   });
 
   it("archiveTodo from Active", () => {
     const active = makeActive();
     const archived = archiveTodo(active);
-    expect(archived._tag).toBe("Archived");
+    expect(archived.status).toBe("Archived");
     expect(archived.archivedAt).toBeDefined();
   });
 
@@ -120,7 +120,7 @@ describe("Entity State Transitions", () => {
     const active = makeActive();
     const completed = completeTodo(active);
     const archived = archiveTodo(completed);
-    expect(archived._tag).toBe("Archived");
+    expect(archived.status).toBe("Archived");
     expect("completedAt" in archived).toBe(false);
   });
 });

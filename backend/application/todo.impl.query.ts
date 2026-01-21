@@ -13,7 +13,7 @@ export type { GetAll } from "./todo.def";
 export const getAll: GetAll = (repo) => (excludeArchived) =>
   m(repo.findAll(), (todos) =>
     todos
-      .filter((t) => !excludeArchived || t._tag !== "Archived")
+      .filter((t) => !excludeArchived || t.status !== "Archived")
       .sort((a, b) => +b.createdAt - +a.createdAt)
       .map(toDTO),
   );

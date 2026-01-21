@@ -17,6 +17,7 @@ import type { newType } from "#shared";
 export type TodoId = newType<string, "TodoId">;
 export type TodoTitle = newType<string, "TodoTitle">;
 export type TodoDescription = newType<string, "TodoDescription">;
+export type Timestamp = newType<Date, "Timestamp">;
 export type Priority = "Low" | "Medium" | "High";
 export type TodoStatus = "Active" | "Completed" | "Archived";
 
@@ -34,7 +35,7 @@ type TodoBase = {
   title: TodoTitle;
   description?: TodoDescription;
   priority: Priority;
-  createdAt: Date;
+  createdAt: Timestamp;
 };
 
 export type ActiveTodo = TodoBase & {
@@ -43,12 +44,12 @@ export type ActiveTodo = TodoBase & {
 
 export type CompletedTodo = TodoBase & {
   status: "Completed";
-  completedAt: Date;
+  completedAt: Timestamp;
 };
 
 export type ArchivedTodo = TodoBase & {
   status: "Archived";
-  archivedAt: Date;
+  archivedAt: Timestamp;
 };
 
 export type Todo = ActiveTodo | CompletedTodo | ArchivedTodo;
