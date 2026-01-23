@@ -2,3 +2,4 @@ book.txt
 book/
 .nuxt
 node_modules
+.vscode
