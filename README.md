@@ -3,6 +3,7 @@
 ## Reference
 
 - https://x.com/ubugeeei/status/2000831033516941824?s=20
+- https://syu-m-5151.hatenablog.com/entry/2026/01/22/094654
 
 ## AI と開発する際のコツ
 
